@@ -2,8 +2,16 @@ require "oystercard"
 
 describe Oystercard do
     describe '#initialize' do
+
+        let(:station){ double :waterloo}
+
         it 'creates each oystercard instance with a default balance' do
             expect(subject.balance).to eq 0
+        end
+    
+        it 'stores the entry station' do
+            subject.touch_in(station)
+            expect(subject.entry_station).to eq station
         end
     end
 
@@ -18,13 +26,13 @@ describe Oystercard do
         end
     end
 
-    describe '#deduct' do 
-        it 'deducts money from the oystercard' do 
-            subject.top_up(10)
-            subject.deduct(5)
-            expect(subject.balance).to eq 5
-        end
-    end 
+    # describe '#deduct' do 
+    #     it 'deducts money from the oystercard' do 
+    #         subject.top_up(10)
+    #         subject.deduct(5)
+    #         expect(subject.balance).to eq 5
+    #     end
+    # end 
 
     describe '#touch_in' do
         it "can touch in" do
@@ -48,8 +56,7 @@ describe Oystercard do
         it 'deducts the cost of the journey from the card when touching out' do
           subject.top_up(5)
           subject.touch_in
-          subject.touch_out
-          expect { subject.deduct }.to change{ subject.balance }.by(-2) 
+          expect { subject.touch_out }.to change{ subject.balance }.by(-2) 
         end
     end
 
