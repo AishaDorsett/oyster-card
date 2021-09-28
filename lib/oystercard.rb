@@ -3,6 +3,7 @@ class Oystercard
     attr_accessor :in_use
 
     MAX_LIMIT = 90
+    MIN_LIMIT = 1
 
     def initialize
         @balance = 0
@@ -14,12 +15,9 @@ class Oystercard
       @balance += value
     end
 
-    def deduct(value)
-        @balance -= value
-    end
-  
     def touch_in
-        @in_use = true
+      fail "Insufficient funds, you need at least £#{MIN_LIMIT} to touch in" if @balance < MIN_LIMIT
+      @in_use = true
     end
 
     def touch_out
@@ -30,4 +28,9 @@ class Oystercard
         @in_use == true
     end
 
+    private
+
+    def deduct(journey=2)
+      @balance -= journey
+  end
 end
