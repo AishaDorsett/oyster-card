@@ -2,7 +2,8 @@ require "oystercard"
 
 describe Oystercard do
 
-	let(:station){ double :station}
+	let(:kings_cross){ double :station}
+	let(:waterloo) {double :exit_station}
 
 	describe '#initialize' do
 		it 'creates each oystercard instance with a default balance' do
@@ -11,8 +12,8 @@ describe Oystercard do
 
 		it 'stores the entry station' do
 			subject.top_up(2)
-			subject.touch_in(station)
-			expect(subject.entry_station).to eq station
+			subject.touch_in(kings_cross)
+			expect(subject.entry_station).to eq kings_cross
 		end
 	end
 
@@ -31,33 +32,55 @@ describe Oystercard do
 	describe '#touch_in' do
 		it "allows the oyster card touch in" do
 			subject.top_up(1)
-			subject.touch_in(station)
+			subject.touch_in(kings_cross)
 			expect(subject).to be_in_journey
 		end
 
 		it "raises an error if oyster has insufficient funds" do
 			minimum = Oystercard::MIN_LIMIT
-			expect{ subject.touch_in(station) }.to raise_error "Insufficient funds. £#{minimum} minimum balance."
+			expect{ subject.touch_in(kings_cross) }.to raise_error "Insufficient funds. £#{minimum} minimum balance."
 		end
 	end
 
 	describe '#touch_out' do
-		it 'returns false if oyster is not in journey so you cannot touch out' do
-			subject.touch_out
-			expect(subject.in_journey?).to eq false
+		it 'returns nil if oyster is not in journey so you cannot touch out' do
+			subject.touch_out(waterloo)
+			expect(subject).to_not be_in_journey
 		end 
 
 		it 'deducts the cost of the journey from the card when touching out' do
 			subject.top_up(5)
-			subject.touch_in(station)
-			expect { subject.touch_out }.to change{ subject.balance }.by(-2) 
+			subject.touch_in(kings_cross)
+			expect { subject.touch_out(waterloo) }.to change{ subject.balance }.by(-2) 
+		end
+
+		it "stores exit station" do
+			subject.touch_out(waterloo)
+			expect(subject.exit_station).to eq waterloo
 		end
 	end
 
 	describe '#in_journey?' do 
 		it 'oyster card is initially not in journey' do
-				expect(subject.in_journey?).to eq false
+				expect(subject).to_not be_in_journey
 		end
 	end
 
+		it "collect journeys" do
+			expect(subject.journeys).to eq []
+		end
+
+		describe '#collect_journeys' do
+		let(:journey){ {entry_station: kings_cross, exit_station: waterloo} }
+		it 'adds extry and exit to the journeys instance variable' do
+			subject.top_up(5)
+			subject.touch_in(kings_cross) 
+			subject.touch_out(waterloo)
+			expect(subject.collect_journeys).to eq [journey]
+		end
+	end
+
+
 end 
+
+
